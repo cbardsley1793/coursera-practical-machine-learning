@@ -10,12 +10,11 @@ The goal of this project is to build a model from the Weight Lifting Exercise Da
 
 ##Summary
 
-In this assignment the modeling effort consisted of data preparation, selecting factors, partitioning the training data, building the model, and evaluating the result. The resulting model uses a random forest algorithm trained against a partitioned data set with a 75%/25% split for traing/validation. Its out of sample error is something
+In this assignment the modeling effort consisted of data preparation, selecting factors, partitioning the training data, building the model, and evaluating the result. The resulting model uses a random forest algorithm trained against a partitioned data set with a 75%/25% split for traing/validation. Its out of sample error is 0.69%.
 
 ##data preparation
 
-
-The training set, at nearly 20k rows, seems large enough to comfortably create a cross validation set. I chose random subsampling without replacement to evenly distribute test data across all participants
+The training set, at nearly 20k rows, seems large enough to comfortably create a validation set. I chose random subsampling without replacement to evenly distribute test data across all participants
 
 Data cleanup achieved the following:
 
@@ -28,11 +27,11 @@ Data cleanup achieved the following:
 
 ##Algorithm 
 
-I used a random forest to develop the model for its strength in classification and mitigation of bias and overfitting, which is useful for developing a generalized model with only 6 training subjects. In another alternative attempt using _generalized linear model_ algorithm, the algorithm was unable to establish predictors from the dataset.
+I used a random forest to develop the model chosen for its strength in classification and mitigation of bias and overfitting, which is useful for developing a generalized model, which is a concern when only sampling data from 6 training subjects. In another alternative attempt using _generalized linear model_ algorithm, the algorithm was unable to establish predictors from the dataset.
 
 #Training
 
-I ran traditionalcross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718
+I ran traditional cross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718
 
 ```{r modelDetail, echo=FALSE, message=F, warning=F}
 source("assignment.R")
@@ -68,14 +67,14 @@ print(result$model)
 
 #Out of Sample Error
 
-The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%. The 
+The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%.
 
 ```{r}
 print(result$model$finalModel)
 ```
 
 
-After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the testing data held out of the training set. 
+After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the training data held out of the training set. 
 
 ```{r matrix, echo=FALSE}
 result$confusionMatrix

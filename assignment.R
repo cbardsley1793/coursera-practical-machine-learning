@@ -183,6 +183,8 @@ dataTestingPml <- read.csv("pml-testing.csv", stringsAsFactors=FALSE, na.strings
 #general preprocessing
 dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 
+
+
 #EVALUATION
 # gyro <- which(grepl("^gyro", colnames(data1$training), ignore.case = F))
 # gyros <- data1$training[, gyro]
@@ -287,3 +289,13 @@ dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 #                        
 # result4$confusionMatrix
 # predict(result4$model, dataTestingPml)
+
+# pml_write_files = function(x){
+#   n = length(x)
+#   for(i in 1:n){
+#     filename = paste0("problem_id_",i,".txt")
+#     write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+#   }
+# }
+# answers <- predict(result4$model, dataTestingPml)
+# pml_write_files(answers)
