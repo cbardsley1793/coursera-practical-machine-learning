@@ -75,7 +75,7 @@ img {
 <div id="data-preparation" class="section level2">
 <h2>data preparation</h2>
 <p>The training set, at nearly 20k rows, seems large enough to comfortably create a cross validation set. I chose random subsampling without replacement to evenly distribute test data across all participants</p>
-<p>Data cleanup aims to</p>
+<p>Data cleanup achieved the following:</p>
 <p><em>remove unwanted factors</em> Factors that qualitatively aren’t correlated with a generalizable prediction algorithm, such as indicies, timestamps, windows, and names, are specific to the training activity and don’t add information to a generalizable model that can be used outside of training.</p>
 <p><em>remove noisy factors</em>. Primarily factors with high percentages of invalid to valid data (NA or Div/0) would prevent an algorithm from successful training. Factors with a greater than .5 ratio were removed from the training set.</p>
 <p><em>convert data types</em>. Data as loaded from .csv required some configuration to avoid continuous data from being converted to factors, and categorical types (such as classe) were explicitly converted to factors to support the modeling algorithm.</p>
@@ -86,80 +86,86 @@ img {
 </div>
 <div id="training" class="section level1">
 <h1>Training</h1>
-<p>I ran a prediction. The random forest model yielded 99.98% accuracty with 28 parameters chosen from among 55 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718</p>
-<pre><code>## 
-## Call:
-##  randomForest(x = x, y = y, mtry = param$mtry, proximity = TRUE) 
-##                Type of random forest: classification
-##                      Number of trees: 500
-## No. of variables tried at each split: 28
+<p>I ran traditionalcross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718</p>
+<pre><code>## Random Forest 
 ## 
-##         OOB estimate of  error rate: 0.09%
-## Confusion matrix:
-##      A    B    C    D    E  class.error
-## A 4185    0    0    0    0 0.0000000000
-## B    1 2846    1    0    0 0.0007022472
-## C    0    4 2562    1    0 0.0019477990
-## D    0    0    5 2406    1 0.0024875622
-## E    0    0    0    0 2706 0.0000000000</code></pre>
+## 14718 samples
+##    52 predictor
+##     5 classes: 'A', 'B', 'C', 'D', 'E' 
+## 
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## 
+## Summary of sample sizes: 14718, 14718, 14718, 14718, 14718, 14718, ... 
+## 
+## Resampling results across tuning parameters:
+## 
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+##    2    0.9890329  0.9861189  0.001715064  0.002170244
+##   27    0.9884264  0.9853513  0.001810166  0.002292922
+##   52    0.9806689  0.9755319  0.004626367  0.005859356
+## 
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 2.</code></pre>
 </div>
 <div id="out-of-sample-error" class="section level1">
 <h1>Out of Sample Error</h1>
-<p>The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.09%</p>
+<p>The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%. The</p>
+<pre class="r"><code>print(result$model$finalModel)</code></pre>
 <pre><code>## 
 ## Call:
-##  randomForest(x = x, y = y, mtry = param$mtry, proximity = TRUE) 
+##  randomForest(x = x, y = y, mtry = param$mtry, proximity = TRUE,      allowParallel = TRUE) 
 ##                Type of random forest: classification
 ##                      Number of trees: 500
-## No. of variables tried at each split: 28
+## No. of variables tried at each split: 2
 ## 
-##         OOB estimate of  error rate: 0.09%
+##         OOB estimate of  error rate: 0.69%
 ## Confusion matrix:
 ##      A    B    C    D    E  class.error
-## A 4185    0    0    0    0 0.0000000000
-## B    1 2846    1    0    0 0.0007022472
-## C    0    4 2562    1    0 0.0019477990
-## D    0    0    5 2406    1 0.0024875622
-## E    0    0    0    0 2706 0.0000000000</code></pre>
-<p>On a separate, conventional validation, the model misclassfied a single sample and had a 99.98% accuracy rate on the testing data held out of the training set.</p>
+## A 4181    3    0    0    1 0.0009557945
+## B   14 2826    8    0    0 0.0077247191
+## C    0   20 2544    3    0 0.0089598753
+## D    0    0   43 2367    2 0.0186567164
+## E    0    0    2    5 2699 0.0025868441</code></pre>
+<p>After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the testing data held out of the training set.</p>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1395    0    0    0    0
-##          B    1  948    0    0    0
-##          C    0    0  855    0    0
-##          D    0    0    0  804    0
-##          E    0    0    0    0  901
+##          B    3  946    0    0    0
+##          C    0    6  849    0    0
+##          D    0    0    7  797    0
+##          E    0    0    3    1  897
 ## 
 ## Overall Statistics
-##                                      
-##                Accuracy : 0.9998     
-##                  95% CI : (0.9989, 1)
-##     No Information Rate : 0.2847     
-##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
-##                                      
-##                   Kappa : 0.9997     
-##  Mcnemar's Test P-Value : NA         
+##                                           
+##                Accuracy : 0.9959          
+##                  95% CI : (0.9937, 0.9975)
+##     No Information Rate : 0.2851          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9948          
+##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9993   1.0000   1.0000   1.0000   1.0000
-## Specificity            1.0000   0.9997   1.0000   1.0000   1.0000
-## Pos Pred Value         1.0000   0.9989   1.0000   1.0000   1.0000
-## Neg Pred Value         0.9997   1.0000   1.0000   1.0000   1.0000
-## Prevalence             0.2847   0.1933   0.1743   0.1639   0.1837
-## Detection Rate         0.2845   0.1933   0.1743   0.1639   0.1837
+## Sensitivity            0.9979   0.9937   0.9884   0.9987   1.0000
+## Specificity            1.0000   0.9992   0.9985   0.9983   0.9990
+## Pos Pred Value         1.0000   0.9968   0.9930   0.9913   0.9956
+## Neg Pred Value         0.9991   0.9985   0.9975   0.9998   1.0000
+## Prevalence             0.2851   0.1941   0.1752   0.1627   0.1829
+## Detection Rate         0.2845   0.1929   0.1731   0.1625   0.1829
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1639   0.1837
-## Balanced Accuracy      0.9996   0.9999   1.0000   1.0000   1.0000</code></pre>
-<p>The predictive model run against the testing set yields the following predictions</p>
+## Balanced Accuracy      0.9989   0.9965   0.9934   0.9985   0.9995</code></pre>
+<p>This error rate could be reduced perfect prediction by including the window data, but I considered it to be a sign of overfitting. The predictive model run against the testing set yields the following predictions</p>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
+<div id="conclusions" class="section level2">
+<h2>conclusions</h2>
+<p>The random forest model has shown to be predict accurately against the validation set and through cross validation. The test set draws from the same set of data, and I expect it will predict accurately against it. However, the model is tuned to a sample from six subjects and its unclear how well this model will generalize to other subjects.</p>
 </div>
-<div id="conclusions" class="section level1">
-<h1>conclusions</h1>
-<p>The random forest model has shown to be predict accurately against the validation set and through cross validation. The test set draws from the same set of data, and I expect it will predict accurately against it. However, the model is tuned to a sample from 6 select subjects and its unclear how well this model will generalize to other subjects.</p>
 </div>
 
 
