@@ -17,7 +17,7 @@ In this assignment the modeling effort consisted of data preparation, selecting 
 
 The training set, at nearly 20k rows, seems large enough to comfortably create a cross validation set. I chose random subsampling without replacement to evenly distribute test data across all participants
 
-Data cleanup aims to 
+Data cleanup achieved the following:
 
 *remove unwanted factors* Factors that qualitatively aren't correlated with a generalizable prediction algorithm, such as indicies, timestamps, windows, and names, are specific to the training activity and don't add information to a generalizable model that can be used outside of training.
 
@@ -32,12 +32,13 @@ I used a random forest to develop the model for its strength in classification a
 
 #Training
 
-I ran a prediction. The random forest model yielded 99.98% accuracty with 28 parameters chosen from among 55 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718
+I ran traditionalcross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718
 
 ```{r modelDetail, echo=FALSE, message=F, warning=F}
 source("assignment.R")
-modelFile <- 'modelRF_75train_notimestamps.Rds'
-data3 <- cleanData(noiseTolerance = 0.5
+set.seed(1242)
+modelFile <- 'modelRF_75train_notimestamps_50noise.Rds'
+data <- cleanData(noiseTolerance = 0.5
                   , trainingRatio = 0.75
                   , exclusionSet = c("timestamp"
                                      #,"kurtosis"
@@ -58,37 +59,37 @@ data3 <- cleanData(noiseTolerance = 0.5
                                    "skewness_yaw_belt", #garbage data
                                    "kurtosis_yaw_belt") #garbage data
                   )
-result3 <- generateModel(modelRds = modelFile
-                       , training = data3$training
-                       , testing = data3$testing )
+result <- generateModel(modelRds = modelFile
+                       , training = data$training
+                       , testing = data$testing )
                        
-print(result3$model$finalModel)
+print(result$model)
 ```
-
 
 #Out of Sample Error
 
-The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.09%
+The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%. The 
 
-```{r finalModel, echo=FALSE}
-result3$model$finalModel
+```{r}
+print(result$model$finalModel)
 ```
 
-On a separate, conventional validation, the model misclassfied a single sample and had a 99.98% accuracy rate on the testing data held out of the training set. 
+
+After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the testing data held out of the training set. 
 
 ```{r matrix, echo=FALSE}
-result3$confusionMatrix
+result$confusionMatrix
 ```
 
-The predictive model run against the testing set yields the following predictions
+This error rate could be reduced perfect prediction by including the window data, but I considered it to be a sign of overfitting. The predictive model run against the testing set yields the following predictions
 
 ```{r prediction, echo=FALSE}
-prediction <- predict(result3$model, dataTestingPml)
+prediction <- predict(result$model, dataTestingPml)
 print(prediction)
 ```
 
 ##conclusions
 
-The random forest model has shown to be predict accurately against the validation set and through cross validation. The test set draws from the same set of data, and I expect it will predict accurately against it. However, the model is tuned to a sample from 6 select subjects and its unclear how well this model will generalize to other subjects.
+The random forest model has shown to be predict accurately against the validation set and through cross validation. The test set draws from the same set of data, and I expect it will predict accurately against it. However, the model is tuned to a sample from six subjects and its unclear how well this model will generalize to other subjects.
 
 

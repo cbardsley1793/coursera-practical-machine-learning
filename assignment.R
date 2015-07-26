@@ -8,7 +8,7 @@ if (!require("caret") || !require("doParallel")) {
 
 #setwd('~/Desktop/machine_learning/assignment/')
 #allow for multithreading
-registerDoParallel(cores=2)
+registerDoParallel(cores=3)
 
 
 #HELPER FUNCTIONS
@@ -133,7 +133,7 @@ findNoisyFactors <- function (dataFrame, threshold) {
   ##apply transforms to testing
   testing$classe <- as.factor(testing$classe)
   testing$user_name <- as.factor(testing$user_name)
-  return(list(training=training, testing=testing))
+  return(list(training=trainPre, testing=testing))
 }
   
 #' @param modelRda - a model data file
@@ -146,10 +146,10 @@ generateModel <- function (modelRds = 'modelRF_80train_names_windows_70noise.Rda
     model <- readRDS(file=modelRds)
   } else {
     #random forest
-    model <- train(classe ~ ., method="rf", data=trainPre, 
+    model <- train(classe ~ ., method="rf", data=training, 
                      #trControl=trainControl(method="cv",number=5),
                      prox=TRUE,allowParallel=TRUE)
-    writeRDS(model, file=modelRds)
+    saveRDS(model, file=modelRds)
   }
   
   #modelGLM <- train(trainPre$classe ~ ., method="glm", data=trainPC)
@@ -163,8 +163,6 @@ generateModel <- function (modelRds = 'modelRF_80train_names_windows_70noise.Rda
   #testPre <- testPre[,!names(testPre) %in% exclusions]
   #testPre <- removeFactorSets(testPre, exclusion_sets)
 
-  #load(file="model.Rdata")
-  
   #evaluate random forest model
   cm <- confusionMatrix(testing$classe, predict(model, testing))
   
@@ -178,8 +176,6 @@ generateModel <- function (modelRds = 'modelRF_80train_names_windows_70noise.Rda
 
 ###BEGIN EXERCISE
 
-set.seed(1242)
-
 #load data from disk
 dataTrainPml <- read.csv("pml-training.csv", stringsAsFactors=FALSE, na.strings=c("NA", "#DIV/0!"))
 dataTestingPml <- read.csv("pml-testing.csv", stringsAsFactors=FALSE, na.strings=c("NA", "#DIV/0!"))
@@ -188,6 +184,13 @@ dataTestingPml <- read.csv("pml-testing.csv", stringsAsFactors=FALSE, na.strings
 dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 
 #EVALUATION
+# gyro <- which(grepl("^gyro", colnames(data1$training), ignore.case = F))
+# gyros <- data1$training[, gyro]
+# 
+# featurePlot(x = gyros, y = data1$training$classe, pch = 19, main = "Feature plot", 
+#             plot = "pairs")
+
+# set.seed(1242)
 # modelFile <- 'modelRF_80train_names_windows_70noise.Rds'
 # data1 <- cleanData(noiseTolerance = 0.8
 #                   , trainingRatio = 0.80)
@@ -196,6 +199,7 @@ dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 # result1$confusionMatrix
 # predict(result1$model, dataTestingPml)
 # 
+# set.seed(1242)
 # modelFile <- 'modelRF_80train_names_windows_70noise.Rds'
 # data2 <- cleanData(noiseTolerance = 0.7
 #                   , trainingRatio = 0.8
@@ -224,6 +228,7 @@ dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 # result2$confusionMatrix
 # predict(result2$model, dataTestingPml)
 # 
+# set.seed(1242)
 # modelFile <- 'modelRF_75train_notimestamps.Rds'
 # data3 <- cleanData(noiseTolerance = 0.5
 #                   , trainingRatio = 0.75
@@ -252,4 +257,33 @@ dataTestingPml$user_name <- as.factor(dataTestingPml$user_name)
 #                        
 # result3$confusionMatrix
 # predict(result3$model, dataTestingPml)
-
+# 
+# set.seed(1242)
+# modelFile <- 'modelRF_75train_notimestamps_50noise.Rds'
+# data4 <- cleanData(noiseTolerance = 0.5
+#                   , trainingRatio = 0.75
+#                   , exclusionSet = c("timestamp"
+#                                      #,"kurtosis"
+#                                      #,"skewness" 
+#                   )
+#                   , exclusions = c("X", 
+#                                    "user_name", #not sensor data
+#                                    "new_window", #not sensor data
+#                                    "num_window", #not sensor data
+#                                    "amplitude_yaw_belt", #garbage data
+#                                    "amplitude_yaw_dumbbell", #garbage data
+#                                    "amplitude_yaw_forearm",#garbage data
+#                                    "cvtd_timestamp", #not correlated
+#                                    "skewness_yaw_forearm", #garbage data
+#                                    "kurtosis_yaw_forearm", #garbage data
+#                                    "skewness_yaw_dumbbell", #garbage data
+#                                    "kurtosis_yaw_dumbbell", #garbage data
+#                                    "skewness_yaw_belt", #garbage data
+#                                    "kurtosis_yaw_belt") #garbage data
+#                   )
+# result4 <- generateModel(modelRds = modelFile
+#                        , training = data4$training
+#                        , testing = data4$testing )
+#                        
+# result4$confusionMatrix
+# predict(result4$model, dataTestingPml)
