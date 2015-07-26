@@ -70,11 +70,11 @@ img {
 </div>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>In this assignment the modeling effort consisted of data preparation, selecting factors, partitioning the training data, building the model, and evaluating the result. The resulting model uses a random forest algorithm trained against a partitioned data set with a 75%/25% split for traing/validation. Its out of sample error is something</p>
+<p>In this assignment the modeling effort consisted of data preparation, selecting factors, partitioning the training data, building the model, and evaluating the result. The resulting model uses a random forest algorithm trained against a partitioned data set with a 75%/25% split for traing/validation. Its out of sample error is 0.69%.</p>
 </div>
 <div id="data-preparation" class="section level2">
 <h2>data preparation</h2>
-<p>The training set, at nearly 20k rows, seems large enough to comfortably create a cross validation set. I chose random subsampling without replacement to evenly distribute test data across all participants</p>
+<p>The training set, at nearly 20k rows, seems large enough to comfortably create a validation set. I chose random subsampling without replacement to evenly distribute test data across all participants</p>
 <p>Data cleanup achieved the following:</p>
 <p><em>remove unwanted factors</em> Factors that qualitatively aren’t correlated with a generalizable prediction algorithm, such as indicies, timestamps, windows, and names, are specific to the training activity and don’t add information to a generalizable model that can be used outside of training.</p>
 <p><em>remove noisy factors</em>. Primarily factors with high percentages of invalid to valid data (NA or Div/0) would prevent an algorithm from successful training. Factors with a greater than .5 ratio were removed from the training set.</p>
@@ -82,11 +82,11 @@ img {
 </div>
 <div id="algorithm" class="section level2">
 <h2>Algorithm</h2>
-<p>I used a random forest to develop the model for its strength in classification and mitigation of bias and overfitting, which is useful for developing a generalized model with only 6 training subjects. In another alternative attempt using <em>generalized linear model</em> algorithm, the algorithm was unable to establish predictors from the dataset.</p>
+<p>I used a random forest to develop the model chosen for its strength in classification and mitigation of bias and overfitting, which is useful for developing a generalized model, which is a concern when only sampling data from 6 training subjects. In another alternative attempt using <em>generalized linear model</em> algorithm, the algorithm was unable to establish predictors from the dataset.</p>
 </div>
 <div id="training" class="section level1">
 <h1>Training</h1>
-<p>I ran traditionalcross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718</p>
+<p>I ran traditional cross-validation on the samples withheld from training to evaluate the effectiveness of the models. The random forest model yielded 99.8% accuracy with 27 parameters chosen from among 52 factors on a set of 14718 samples. Bootstrapping was done with 25 reps and sample sizes of 14718</p>
 <pre><code>## Random Forest 
 ## 
 ## 14718 samples
@@ -110,7 +110,7 @@ img {
 </div>
 <div id="out-of-sample-error" class="section level1">
 <h1>Out of Sample Error</h1>
-<p>The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%. The</p>
+<p>The random forest algorithm averages the out of bag error at each branch, and yields its own estimate of out of sample error from the training set, estimated to be 0.69%.</p>
 <pre class="r"><code>print(result$model$finalModel)</code></pre>
 <pre><code>## 
 ## Call:
@@ -127,7 +127,7 @@ img {
 ## C    0   20 2544    3    0 0.0089598753
 ## D    0    0   43 2367    2 0.0186567164
 ## E    0    0    2    5 2699 0.0025868441</code></pre>
-<p>After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the testing data held out of the training set.</p>
+<p>After training, I performed a separate, conventional validation, demonstrating that the model has a 99.8% accuracy rate on the training data held out of the training set.</p>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
